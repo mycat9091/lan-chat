@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>局域网聊天室</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="login-screen" id="loginScreen">
+            <div class="login-box">
+                <h1>🌐 局域网聊天室</h1>
+                <p>请输入您的昵称加入聊天</p>
+                <input type="text" id="usernameInput" placeholder="输入昵称" maxlength="20" autocomplete="off">
+                <button id="joinBtn">加入聊天</button>
+                <button id="clearMemoryBtn" class="clear-memory-btn">清除记忆</button>
+            </div>
+        </div>
+
+        <div class="chat-screen" id="chatScreen" style="display: none;">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <h3>在线用户</h3>
+                    <span class="user-count" id="userCount">0</span>
+                </div>
+                <div class="users-list" id="usersList"></div>
+            </div>
+
+            <div class="main-chat">
+                <div class="chat-header">
+                    <h2>群聊大厅</h2>
+                    <div class="current-user">
+                        <span id="currentUsername"></span>
+                        <button id="logoutBtn" class="logout-btn">退出</button>
+                    </div>
+                </div>
+
+                <div class="messages-container" id="messagesContainer">
+                    <div class="welcome-message">
+                        欢迎来到局域网聊天室！开始聊天吧 💬
+                    </div>
+                </div>
+
+                <div class="input-area">
+                    <label for="fileInput" class="file-btn" title="发送文件">📎</label>
+                    <input type="file" id="fileInput" style="display: none;">
+                    <input type="text" id="messageInput" placeholder="输入消息..." autocomplete="off">
+                    <button id="sendBtn">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/client.js"></script>
+</body>
+</html>

@@ -10,10 +10,13 @@ const messagesContainer = document.getElementById('messagesContainer');
 const messageInput = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
 const fileInput = document.getElementById('fileInput');
+const imageInput = document.getElementById('imageInput');
 const usersList = document.getElementById('usersList');
 const userCount = document.getElementById('userCount');
 const currentUsernameDisplay = document.getElementById('currentUsername');
 const clearMemoryBtn = document.getElementById('clearMemoryBtn');
+const sidebar = document.getElementById('sidebar');
+const toggleUsersBtn = document.getElementById('toggleUsersBtn');
 
 window.addEventListener('load', loadSavedUsername);
 
@@ -31,6 +34,15 @@ messageInput.addEventListener('keypress', (e) => {
 });
 
 fileInput.addEventListener('change', handleFileSelect);
+imageInput.addEventListener('change', handleImageSelect);
+
+// 手机端：切换用户面板
+if (toggleUsersBtn) {
+    toggleUsersBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('collapsed');
+        toggleUsersBtn.textContent = sidebar.classList.contains('collapsed') ? '👤' : '👥';
+    });
+}
 
 function loadSavedUsername() {
     const savedUsername = localStorage.getItem('lan-chat-username');

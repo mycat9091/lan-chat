@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
     <title>局域网聊天室</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -30,6 +30,7 @@
             <div class="main-chat">
                 <div class="chat-header">
                     <h2>群聊大厅</h2>
+                    <button id="toggleUsersBtn" class="toggle-users-btn" style="display: none;">👥</button>
                     <div class="current-user">
                         <span id="currentUsername"></span>
                         <button id="logoutBtn" class="logout-btn">退出</button>
@@ -43,6 +44,8 @@
                 </div>
 
                 <div class="input-area">
+                    <label for="imageInput" class="file-btn" title="发送图片">🖼️</label>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
                     <label for="fileInput" class="file-btn" title="发送文件">📎</label>
                     <input type="file" id="fileInput" style="display: none;">
                     <input type="text" id="messageInput" placeholder="输入消息..." autocomplete="off">

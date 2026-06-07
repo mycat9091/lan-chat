@@ -39,8 +39,15 @@ imageInput.addEventListener('change', handleImageSelect);
 // 手机端：切换用户面板
 if (toggleUsersBtn) {
     toggleUsersBtn.addEventListener('click', () => {
-        sidebar.classList.toggle('collapsed');
-        toggleUsersBtn.textContent = sidebar.classList.contains('collapsed') ? '👤' : '👥';
+        const sidebarEl = document.querySelector('.sidebar');
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            sidebarEl.classList.toggle('expanded');
+            toggleUsersBtn.textContent = sidebarEl.classList.contains('expanded') ? '👥' : '👤';
+        } else {
+            sidebarEl.classList.toggle('hidden');
+            toggleUsersBtn.textContent = sidebarEl.classList.contains('hidden') ? '👤' : '👥';
+        }
     });
 }
 
@@ -109,11 +116,6 @@ function handleFileSelect(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-        alert('文件大小不能超过 10MB');
-        return;
-    }
-
     const reader = new FileReader();
     reader.onload = (event) => {
         socket.emit('file:upload', {
@@ -125,6 +127,23 @@ function handleFileSelect(e) {
     reader.readAsDataURL(file);
 
     fileInput.value = '';
+}
+
+function handleImageSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        socket.emit('file:upload', {
+            fileName: file.name,
+            fileSize: file.size,
+            fileData: event.target.result
+        });
+    };
+    reader.readAsDataURL(file);
+
+    imageInput.value = '';
 }
 
 function displayMessage(data) {
@@ -156,6 +175,14 @@ function displaySystemMessage(message) {
     scrollToBottom();
 }
 
+function isImageFile(fileName, fileData) {
+    const ext = fileName.toLowerCase().split('.').pop();
+    const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+    if (imageExts.includes(ext)) return true;
+    if (fileData && fileData.startsWith('data:image/')) return true;
+    return false;
+}
+
 function displayFile(data) {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message file';
@@ -167,20 +194,33 @@ function displayFile(data) {
 
     const fileSize = formatFileSize(data.fileSize);
 
-    messageDiv.innerHTML = `
-        <div class="message-header">
-            <span class="message-username">${escapeHtml(data.username)}</span>
-            <span class="message-time">${time}</span>
-        </div>
-        <div class="message-content" onclick="downloadFile('${data.fileData}', '${escapeHtml(data.fileName)}')">
-            <div class="file-icon">📄</div>
-            <div class="file-info">
-                <div class="file-name">${escapeHtml(data.fileName)}</div>
-                <div class="file-size">${fileSize}</div>
+    if (isImageFile(data.fileName, data.fileData)) {
+        messageDiv.innerHTML = `
+            <div class="message-header">
+                <span class="message-username">${escapeHtml(data.username)}</span>
+                <span class="message-time">${time}</span>
             </div>
-            <div>⬇️</div>
-        </div>
-    `;
+            <div class="image-content">
+                <img class="chat-image" src="${data.fileData}" alt="${escapeHtml(data.fileName)}" onclick="showImageModal(this.src)">
+                <span class="image-name">${escapeHtml(data.fileName)} (${fileSize})</span>
+            </div>
+        `;
+    } else {
+        messageDiv.innerHTML = `
+            <div class="message-header">
+                <span class="message-username">${escapeHtml(data.username)}</span>
+                <span class="message-time">${time}</span>
+            </div>
+            <div class="message-content" onclick="downloadFile('${data.fileData}', '${escapeHtml(data.fileName)}')">
+                <div class="file-icon">📄</div>
+                <div class="file-info">
+                    <div class="file-name">${escapeHtml(data.fileName)}</div>
+                    <div class="file-size">${fileSize}</div>
+                </div>
+                <div>⬇️</div>
+            </div>
+        `;
+    }
 
     messagesContainer.appendChild(messageDiv);
     scrollToBottom();
@@ -191,6 +231,23 @@ function downloadFile(dataUrl, fileName) {
     link.href = dataUrl;
     link.download = fileName;
     link.click();
+}
+
+function showImageModal(src) {
+    const modal = document.createElement('div');
+    modal.className = 'image-modal';
+    modal.innerHTML = `
+        <span class="modal-close">&times;</span>
+        <div class="modal-content">
+            <img class="modal-image" src="${src}">
+        </div>
+    `;
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal || e.target.classList.contains('modal-close')) {
+            modal.remove();
+        }
+    });
+    document.body.appendChild(modal);
 }
 
 function updateUsersList(users) {

@@ -7,7 +7,9 @@ const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIO(server);
+const io = socketIO(server, {
+  maxHttpBufferSize: 10 * 1024 * 1024 * 1024
+});
 
 const PORT = 3000;
 

@@ -116,6 +116,12 @@ function handleFileSelect(e) {
     const file = e.target.files[0];
     if (!file) return;
 
+    fileInput.value = '';
+
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.textContent = '发送中...';
+    sendBtn.disabled = true;
+
     const reader = new FileReader();
     reader.onload = (event) => {
         socket.emit('file:upload', {
@@ -123,16 +129,23 @@ function handleFileSelect(e) {
             fileSize: file.size,
             fileData: event.target.result
         });
+        sendBtn.textContent = '发送';
+        sendBtn.disabled = false;
+    };
+    reader.onerror = () => {
+        alert('文件读取失败');
+        sendBtn.textContent = '发送';
+        sendBtn.disabled = false;
     };
     reader.readAsDataURL(file);
-
-    fileInput.value = '';
 }
 
 function handleImageSelect(e) {
     const file = e.target.files[0];
     if (!file) return;
 
+    imageInput.value = '';
+
     const reader = new FileReader();
     reader.onload = (event) => {
         socket.emit('file:upload', {
@@ -142,8 +155,6 @@ function handleImageSelect(e) {
         });
     };
     reader.readAsDataURL(file);
-
-    imageInput.value = '';
 }
 
 function displayMessage(data) {

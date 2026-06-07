@@ -19,6 +19,7 @@ function showMenu() {
   console.log('  4. 查看服务器状态');
   console.log('  5. 查看本机 IP 地址');
   console.log('  6. 在浏览器中打开');
+  console.log('  7. 部署（安装依赖）');
   console.log('  0. 退出');
   console.log('');
   console.log('========================================');
@@ -56,19 +57,14 @@ function startServer() {
       console.log('⚠️  服务器已经在运行中！');
       promptContinue();
     } else {
-      exec('start "局域网聊天服务器" cmd /k "node server/index.js"', (error) => {
-        if (error) {
-          console.log('❌ 启动失败:', error.message);
-        } else {
-          setTimeout(() => {
-            const ip = getLocalIP();
-            console.log('✅ 服务器已启动！');
-            console.log(`\n本地访问: http://localhost:3000`);
-            console.log(`局域网访问: http://${ip}:3000\n`);
-          }, 1000);
-        }
+      exec('start "局域网聊天服务器" cmd /k "node server/index.js"', { windowsHide: false });
+      setTimeout(() => {
+        const ip = getLocalIP();
+        console.log('✅ 服务器已启动！');
+        console.log(`\n本地访问: http://localhost:3000`);
+        console.log(`局域网访问: http://${ip}:3000\n`);
         promptContinue();
-      });
+      }, 1000);
     }
   });
 }
@@ -161,6 +157,21 @@ function openBrowser() {
   });
 }
 
+function deployApp() {
+  console.log('\n正在安装依赖（npm install）...\n');
+  exec('npm install', { cwd: __dirname }, (error, stdout, stderr) => {
+    if (error) {
+      console.log('❌ 安装失败:', error.message);
+      if (stderr) console.log(stderr);
+    } else {
+      console.log('✅ 依赖安装完成！');
+      if (stdout) console.log(stdout);
+      console.log('\n可以选择"1. 启动服务器"开始使用。');
+    }
+    promptContinue();
+  });
+}
+
 function promptContinue() {
   rl.question('按 Enter 继续...', () => {
     handleMenu();
@@ -188,6 +199,9 @@ function handleMenu() {
         break;
       case '6':
         openBrowser();
+        break;
+      case '7':
+        deployApp();
         break;
       case '0':
         console.log('\n再见！\n');

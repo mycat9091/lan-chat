@@ -186,12 +186,9 @@ function displaySystemMessage(message) {
     scrollToBottom();
 }
 
-function isImageFile(fileName, fileData) {
+function isImageFile(fileName) {
     const ext = fileName.toLowerCase().split('.').pop();
-    const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
-    if (imageExts.includes(ext)) return true;
-    if (fileData && fileData.startsWith('data:image/')) return true;
-    return false;
+    return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(ext);
 }
 
 function displayFile(data) {
@@ -204,15 +201,16 @@ function displayFile(data) {
     });
 
     const fileSize = formatFileSize(data.fileSize);
+    const fileUrl = data.fileUrl || data.fileData;
 
-    if (isImageFile(data.fileName, data.fileData)) {
+    if (isImageFile(data.fileName)) {
         messageDiv.innerHTML = `
             <div class="message-header">
                 <span class="message-username">${escapeHtml(data.username)}</span>
                 <span class="message-time">${time}</span>
             </div>
             <div class="image-content">
-                <img class="chat-image" src="${data.fileData}" alt="${escapeHtml(data.fileName)}" onclick="showImageModal(this.src)">
+                <img class="chat-image" src="${fileUrl}" alt="${escapeHtml(data.fileName)}" onclick="showImageModal(this.src)">
                 <span class="image-name">${escapeHtml(data.fileName)} (${fileSize})</span>
             </div>
         `;
@@ -222,7 +220,7 @@ function displayFile(data) {
                 <span class="message-username">${escapeHtml(data.username)}</span>
                 <span class="message-time">${time}</span>
             </div>
-            <div class="message-content" onclick="downloadFile('${data.fileData}', '${escapeHtml(data.fileName)}')">
+            <div class="message-content" onclick="downloadFile('${fileUrl}', '${escapeHtml(data.fileName)}')">
                 <div class="file-icon">📄</div>
                 <div class="file-info">
                     <div class="file-name">${escapeHtml(data.fileName)}</div>
@@ -237,9 +235,9 @@ function displayFile(data) {
     scrollToBottom();
 }
 
-function downloadFile(dataUrl, fileName) {
+function downloadFile(url, fileName) {
     const link = document.createElement('a');
-    link.href = dataUrl;
+    link.href = url;
     link.download = fileName;
     link.click();
 }

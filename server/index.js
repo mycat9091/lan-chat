@@ -2,7 +2,6 @@ const express = require('express');
 const http = require('http');
 const socketIO = require('socket.io');
 const path = require('path');
-const multer = require('multer');
 const fs = require('fs');
 
 const app = express();
@@ -12,20 +11,14 @@ const io = socketIO(server, {
 });
 
 const PORT = 3000;
+const uploadsDir = path.join(__dirname, '../uploads');
+
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 
 app.use(express.static(path.join(__dirname, '../public')));
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../uploads'));
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + '-' + file.originalname;
-    cb(null, uniqueName);
-  }
-});
-
-const upload = multer({ storage: storage });
+app.use('/uploads', express.static(uploadsDir));
 
 const users = new Map();
 const rooms = new Map();
@@ -85,19 +78,28 @@ io.on('connection', (socket) => {
   socket.on('file:upload', (data) => {
     const user = users.get(socket.id);
     if (user) {
-      const fileData = {
+      const fileName = Date.now() + '-' + data.fileName;
+      const filePath = path.join(uploadsDir, fileName);
+
+      const matches = data.fileData.match(/^data:.+;base64,(.+)$/);
+      if (matches) {
+        const buffer = Buffer.from(matches[1], 'base64');
+        fs.writeFileSync(filePath, buffer);
+      }
+
+      const fileInfo = {
         id: Date.now(),
         username: user.username,
         fileName: data.fileName,
         fileSize: data.fileSize,
-        fileData: data.fileData,
+        fileUrl: '/uploads/' + fileName,
         timestamp: new Date(),
         type: 'file'
       };
 
-      io.emit('file:receive', fileData);
+      io.emit('file:receive', fileInfo);
 
-      messageHistory.push(fileData);
+      messageHistory.push(fileInfo);
       if (messageHistory.length > MAX_HISTORY) {
         messageHistory.shift();
       }
